@@ -33,10 +33,7 @@ mac:
 win:
   icon: build/icon.png
   target:
-    - target: nsis
-      arch:
-        - x64
-        - arm64
+    - nsis
 
 nsis:
   oneClick: false
