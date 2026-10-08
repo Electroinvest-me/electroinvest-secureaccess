@@ -24,7 +24,7 @@ jobs:
             engine: powershell -ExecutionPolicy Bypass -File scripts/fetch-engine-win-x64.ps1; powershell -ExecutionPolicy Bypass -File scripts/fetch-drivers.ps1
             pack: npx electron-builder --win --x64 --publish never
           - os: windows-11-arm
-            engine: powershell -ExecutionPolicy Bypass -File scripts/build-engine-win-arm64.ps1; powershell -ExecutionPolicy Bypass -File scripts/fetch-drivers.ps1
+            engine: powershell -ExecutionPolicy Bypass -File scripts/fetch-engine-win-arm64.ps1; powershell -ExecutionPolicy Bypass -File scripts/fetch-drivers.ps1
             pack: npx electron-builder --win --arm64 --publish never
     runs-on: ${{ matrix.os }}
     steps:

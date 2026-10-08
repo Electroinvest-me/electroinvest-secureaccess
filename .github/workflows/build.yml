@@ -32,9 +32,8 @@ jobs:
             engine: powershell -ExecutionPolicy Bypass -File scripts/fetch-engine-win-x64.ps1; powershell -ExecutionPolicy Bypass -File scripts/fetch-drivers.ps1
             pack: npx electron-builder --win --x64 --publish never
           - os: windows-11-arm      # Windows ARM64 (GitHub ARM64 runner)
-            engine: powershell -ExecutionPolicy Bypass -File scripts/build-engine-win-arm64.ps1; powershell -ExecutionPolicy Bypass -File scripts/fetch-drivers.ps1
+            engine: powershell -ExecutionPolicy Bypass -File scripts/fetch-engine-win-arm64.ps1; powershell -ExecutionPolicy Bypass -File scripts/fetch-drivers.ps1
             pack: npx electron-builder --win --arm64 --publish never
-            experimental: true      # builds openconnect from source via MSYS2 — best-effort for now
     runs-on: ${{ matrix.os }}
     continue-on-error: ${{ matrix.experimental == true }}
     steps:
