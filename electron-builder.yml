@@ -6,12 +6,22 @@ directories:
   output: dist
   buildResources: build
 
-# Only app code is packed; the per-platform VPN engine + drivers are shipped as
-# extraResources (populated by scripts/ in CI before packaging).
 files:
   - "src/**/*"
   - "package.json"
   - "!**/*.map"
+
+# The per-platform VPN engine + drivers are produced by scripts/ before packaging
+# and shipped as extraResources. Each CI runner only populates its own platform's
+# engines/<platform>-<arch> subdir, so bundling the whole engines/ dir is safe and
+# avoids per-target path macros. src/core/platform.js resolves the right subdir.
+extraResources:
+  - from: engines
+    to: engines
+    filter: ["**/*"]
+  - from: drivers
+    to: drivers
+    filter: ["**/*"]
 
 mac:
   category: public.app-category.utilities
@@ -19,9 +29,6 @@ mac:
     - dmg
     - zip
   icon: build/icon.png
-  extraResources:
-    - from: engines/darwin-${arch}
-      to: engines/darwin-${arch}
 
 win:
   icon: build/icon.png
@@ -30,15 +37,9 @@ win:
       arch:
         - x64
         - arm64
-  extraResources:
-    - from: engines/win32-${arch}
-      to: engines/win32-${arch}
-    - from: drivers
-      to: drivers
 
 nsis:
   oneClick: false
   perMachine: true
   allowToChangeInstallationDirectory: true
-  # runs the bundled driver setup (Wintun / TAP-Windows6) after install
   include: build/installer.nsh
