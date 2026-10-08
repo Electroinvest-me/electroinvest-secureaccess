@@ -17,9 +17,6 @@ jobs:
           - os: macos-14
             engine: bash scripts/fetch-engine-macos.sh arm64
             pack: npx electron-builder --mac --arm64 --publish never
-          - os: macos-13
-            engine: bash scripts/fetch-engine-macos.sh x86_64
-            pack: npx electron-builder --mac --x64 --publish never
           - os: windows-latest
             engine: powershell -ExecutionPolicy Bypass -File scripts/fetch-engine-win-x64.ps1; powershell -ExecutionPolicy Bypass -File scripts/fetch-drivers.ps1
             pack: npx electron-builder --win --x64 --publish never

@@ -43,3 +43,5 @@ nsis:
   perMachine: true
   allowToChangeInstallationDirectory: true
   include: build/installer.nsh
+  # include arch so the x64 and arm64 installers don't overwrite each other
+  artifactName: ElectroinvestSecureAccess-${version}-${arch}-setup.${ext}

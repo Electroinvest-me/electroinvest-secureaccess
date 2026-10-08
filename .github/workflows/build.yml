@@ -22,12 +22,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: macos-14            # Apple Silicon (arm64)
+          - os: macos-14            # Apple Silicon (arm64) — Intel Macs are deprecated, not supported
             engine: bash scripts/fetch-engine-macos.sh arm64
             pack: npx electron-builder --mac --arm64 --publish never
-          - os: macos-13            # Intel (x64)
-            engine: bash scripts/fetch-engine-macos.sh x86_64
-            pack: npx electron-builder --mac --x64 --publish never
           - os: windows-latest      # Windows x64
             engine: powershell -ExecutionPolicy Bypass -File scripts/fetch-engine-win-x64.ps1; powershell -ExecutionPolicy Bypass -File scripts/fetch-drivers.ps1
             pack: npx electron-builder --win --x64 --publish never
@@ -35,7 +32,6 @@ jobs:
             engine: powershell -ExecutionPolicy Bypass -File scripts/fetch-engine-win-arm64.ps1; powershell -ExecutionPolicy Bypass -File scripts/fetch-drivers.ps1
             pack: npx electron-builder --win --arm64 --publish never
     runs-on: ${{ matrix.os }}
-    continue-on-error: ${{ matrix.experimental == true }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

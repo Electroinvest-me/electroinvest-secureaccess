@@ -4,7 +4,7 @@
 replacement** with a simple GUI. It connects to the **same corporate/government
 VPN** that the official Ivanti client uses (e.g. the one used by the **Montenegro
 Ministry of Public Administration / MJU**), and it runs where the official client
-falls short — including **macOS (Apple Silicon & Intel)** and **Windows on ARM64**.
+falls short — including **macOS (Apple Silicon)** and **Windows on ARM64**.
 Install it, add a connection, click **Connect** — the VPN engine and drivers are
 set up for you.
 
@@ -12,7 +12,7 @@ set up for you.
 Secure** klijent, sa jednostavnim GUI-jem. Povezuje se na **isti državni/korporativni
 VPN** koji koristi zvanični Ivanti klijent (npr. onaj koji koristi **Ministarstvo
 javne uprave Crne Gore / MJU**), i radi tamo gdje zvanični klijent ne pokriva —
-uključujući **macOS (Apple Silicon i Intel)** i **Windows ARM64**. Instaliraš,
+uključujući **macOS (Apple Silicon)** i **Windows ARM64**. Instaliraš,
 dodaš konekciju, klikneš **Connect** — VPN engine i drajveri se sami podese.
 
 > Keywords: Ivanti Secure Access, Pulse Connect Secure, OpenConnect GUI, VPN klijent
@@ -32,7 +32,7 @@ platforms — notably **macOS** and **Windows ARM64**. This project fixes that:
 same VPN, a client that runs everywhere, a clean GUI, and automatic driver setup.
 
 ## Platforms
-- **macOS** — Apple Silicon (arm64) & Intel (x64)
+- **macOS** — Apple Silicon (arm64)
 - **Windows x64**
 - **Windows ARM64** — with a **self-built native `openconnect`** (third-party ARM64
   builds ship a broken crypto backend; this repo builds a working one)
