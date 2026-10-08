@@ -1,0 +1,64 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm install --no-audit --no-fund
+      - run: npm test
+
+  package:
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-14            # Apple Silicon (arm64)
+            engine: bash scripts/fetch-engine-macos.sh arm64
+            pack: npx electron-builder --mac --arm64
+          - os: macos-13            # Intel (x64)
+            engine: bash scripts/fetch-engine-macos.sh x86_64
+            pack: npx electron-builder --mac --x64
+          - os: windows-latest      # Windows x64
+            engine: powershell -ExecutionPolicy Bypass -File scripts/fetch-engine-win-x64.ps1; powershell -ExecutionPolicy Bypass -File scripts/fetch-drivers.ps1
+            pack: npx electron-builder --win --x64
+          - os: windows-11-arm      # Windows ARM64 (GitHub ARM64 runner)
+            engine: powershell -ExecutionPolicy Bypass -File scripts/build-engine-win-arm64.ps1; powershell -ExecutionPolicy Bypass -File scripts/fetch-drivers.ps1
+            pack: npx electron-builder --win --arm64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm install --no-audit --no-fund
+      - run: npm run icons
+      - name: Build/fetch engine (+drivers)
+        shell: bash
+        run: ${{ matrix.engine }}
+      - name: Package
+        shell: bash
+        run: ${{ matrix.pack }}
+        # Optional code-signing via repo secrets (unsigned if absent):
+        env:
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: secureaccess-${{ matrix.os }}
+          path: |
+            dist/*.dmg
+            dist/*.zip
+            dist/*.exe
+          if-no-files-found: ignore

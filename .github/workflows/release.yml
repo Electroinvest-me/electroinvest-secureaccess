@@ -1,0 +1,55 @@
+name: release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-14
+            engine: bash scripts/fetch-engine-macos.sh arm64
+            pack: npx electron-builder --mac --arm64 --publish never
+          - os: macos-13
+            engine: bash scripts/fetch-engine-macos.sh x86_64
+            pack: npx electron-builder --mac --x64 --publish never
+          - os: windows-latest
+            engine: powershell -ExecutionPolicy Bypass -File scripts/fetch-engine-win-x64.ps1; powershell -ExecutionPolicy Bypass -File scripts/fetch-drivers.ps1
+            pack: npx electron-builder --win --x64 --publish never
+          - os: windows-11-arm
+            engine: powershell -ExecutionPolicy Bypass -File scripts/build-engine-win-arm64.ps1; powershell -ExecutionPolicy Bypass -File scripts/fetch-drivers.ps1
+            pack: npx electron-builder --win --arm64 --publish never
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm install --no-audit --no-fund
+      - run: npm run icons
+      - name: Build/fetch engine (+drivers)
+        shell: bash
+        run: ${{ matrix.engine }}
+      - name: Package
+        shell: bash
+        run: ${{ matrix.pack }}
+        env:
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      - name: Publish to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          files: |
+            dist/*.dmg
+            dist/*.zip
+            dist/*.exe

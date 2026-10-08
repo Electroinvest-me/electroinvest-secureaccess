@@ -1,0 +1,12 @@
+node_modules/
+dist/
+*.log
+.DS_Store
+Thumbs.db
+
+# Per-platform engine payloads and driver binaries are produced by scripts/ (and CI);
+# they are large and/or vendor-licensed, so they are not committed.
+engines/*/
+!engines/README.md
+drivers/wintun/
+drivers/openvpn/

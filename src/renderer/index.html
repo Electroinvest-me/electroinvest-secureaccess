@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="sr">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'" />
+<title>Electroinvest SecureAccess</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <div class="logo">E</div>
+    <div><h1>SecureAccess</h1><div class="sub" id="subline">Electroinvest · OpenConnect</div></div>
+  </header>
+  <div id="adminWarn">⚠ Nije pokrenuto kao administrator — povezivanje možda neće raditi.</div>
+  <div class="section"><span>Konekcije</span><span class="add" id="addBtn" title="Dodaj konekciju">＋</span></div>
+  <div id="list"></div>
+  <footer>
+    <span class="fdot" id="fdot"></span>
+    <span class="ftxt" id="ftxt">Nije povezano</span>
+    <span class="logtgl" id="logtgl">Log</span>
+  </footer>
+  <pre id="log"></pre>
+
+  <!-- add / edit -->
+  <div class="overlay" id="ovEdit">
+    <div class="modal">
+      <h3 id="editTitle">Dodaj konekciju</h3>
+      <label>Preset</label>
+      <select id="fPreset"><option value="">— ručno —</option></select>
+      <label>Naziv</label><input type="text" id="fName" />
+      <label>Server URL</label><input type="text" id="fUrl" placeholder="https://host/realm" />
+      <label>Cert pin (pin-sha256:…)</label><input type="text" id="fPin" />
+      <label>Korisničko ime</label><input type="text" id="fUser" />
+      <div class="chk"><input type="checkbox" id="fSave" /><label for="fSave">Sačuvaj lozinku</label></div>
+      <label id="fPwLbl">Lozinka</label><input type="password" id="fPass" />
+      <div class="chk"><input type="checkbox" id="f2fa" /><label for="f2fa">Koristi 2FA (traži kod pri povezivanju)</label></div>
+      <input type="hidden" id="fId" />
+      <input type="hidden" id="fProto" value="pulse" />
+      <div class="actions">
+        <button class="btn ghost" id="editCancel">Odustani</button>
+        <button class="btn primary" id="editSave">Sačuvaj</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- password prompt -->
+  <div class="overlay" id="ovPass">
+    <div class="modal">
+      <h3 id="passTitle">Lozinka</h3>
+      <label>Lozinka</label><input type="password" id="pPass" />
+      <div class="chk"><input type="checkbox" id="pRemember" /><label for="pRemember">Zapamti lozinku (pita samo za 2FA)</label></div>
+      <div class="actions"><button class="btn ghost" id="passCancel">Odustani</button><button class="btn primary" id="passOk">Dalje</button></div>
+    </div>
+  </div>
+
+  <!-- 2fa prompt -->
+  <div class="overlay" id="ov2fa">
+    <div class="modal">
+      <h3>Dvofaktorska potvrda</h3>
+      <label>Kod iz authenticatora</label><input type="text" id="tCode" class="code" inputmode="numeric" autocomplete="one-time-code" />
+      <div class="actions"><button class="btn ghost" id="tfaCancel">Odustani</button><button class="btn primary" id="tfaOk">Poveži</button></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
