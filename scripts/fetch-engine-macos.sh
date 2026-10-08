@@ -12,11 +12,11 @@ case "$ARCH" in
 esac
 mkdir -p "$OUT"
 
-brew install openconnect vpnc-scripts >/dev/null
+brew install openconnect >/dev/null
 PREFIX="$(brew --prefix)"
 cp "$PREFIX/bin/openconnect" "$OUT/openconnect"
-# vpnc-script (route/dns setup on mac)
-if [ -f "$PREFIX/etc/vpnc/vpnc-script" ]; then cp "$PREFIX/etc/vpnc/vpnc-script" "$OUT/vpnc-script"; fi
+# vpnc-script (route/dns setup on mac) — fetch the canonical one
+curl -fsSL -o "$OUT/vpnc-script" https://gitlab.com/openconnect/vpnc-scripts/-/raw/master/vpnc-script
 chmod +x "$OUT/openconnect" "$OUT/vpnc-script" 2>/dev/null || true
 
 # Bundle + relocate non-system dylibs recursively.
