@@ -1,5 +1,5 @@
 'use strict';
-const { app, BrowserWindow, Tray, Menu, nativeImage, safeStorage } = require('electron');
+const { app, BrowserWindow, Tray, Menu, nativeImage, safeStorage, ipcMain } = require('electron');
 const path = require('path');
 const { execFile, execFileSync, spawn } = require('child_process');
 const { engineConfig } = require('../core/platform');
@@ -19,8 +19,12 @@ const secrets = makeSecrets(safeStorage);
 const engine = new Engine({ exe: cfg.exe, script: cfg.script, extraArgs: cfg.extraArgs });
 
 let win = null;
+let splash = null;
 let tray = null;
 let icons = {};
+let splashShownAt = 0;
+let revealTimer = null;
+let startupFallback = null;
 
 // ---------- elevation (Windows needs admin for tun + routes) ----------
 function isAdmin() {
@@ -70,9 +74,48 @@ engine.on('status', (st) => { send('state', st); updateTray(st); });
 engine.on('tun', (ifIndex) => applyRouting({ ifIndex, run: execFile, log: (l) => send('log', l) }));
 engine.on('sessionLimit', () => send('log', '[server] Postojeća sesija je prekinuta (nalog dozvoljava 1 sesiju).'));
 
+function revealMainWindow() {
+  if (!win || win.isDestroyed() || revealTimer) return;
+  clearTimeout(startupFallback);
+  const remaining = splash ? Math.max(0, 1400 - (Date.now() - splashShownAt)) : 0;
+  revealTimer = setTimeout(() => {
+    revealTimer = null;
+    if (!win || win.isDestroyed()) return;
+    win.show();
+    win.focus();
+    if (splash && !splash.isDestroyed()) splash.destroy();
+    splash = null;
+  }, remaining);
+}
+
+function createSplashWindow() {
+  splashShownAt = Date.now();
+  splash = new BrowserWindow({
+    width: 760, height: 460, useContentSize: true,
+    title: 'Electroinvest SecureAccess',
+    frame: false, show: false, resizable: false,
+    maximizable: false, minimizable: false, fullscreenable: false,
+    skipTaskbar: true, backgroundColor: '#f7f6f2',
+    webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true },
+  });
+  splash.once('ready-to-show', () => {
+    if (!splash || splash.isDestroyed()) return;
+    splashShownAt = Date.now();
+    splash.show();
+  });
+  splash.on('closed', () => { splash = null; });
+  splash.loadFile(path.join(__dirname, '..', 'renderer', 'splash.html'), {
+    query: { version: app.getVersion() },
+  }).catch(() => {
+    if (splash && !splash.isDestroyed()) splash.destroy();
+    revealMainWindow();
+  });
+}
+
 function createWindow() {
   win = new BrowserWindow({
-    width: 440, height: 600, minWidth: 380, minHeight: 500,
+    width: 480, height: 660, minWidth: 420, minHeight: 540,
+    useContentSize: true, show: false, backgroundColor: '#f5f5f3',
     title: 'Electroinvest SecureAccess', autoHideMenuBar: true,
     icon: icons.app && !icons.app.isEmpty() ? icons.app : undefined,
     webPreferences: {
@@ -81,10 +124,17 @@ function createWindow() {
       nodeIntegration: false,
     },
   });
-  win.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
   win.on('close', (e) => { if (!app.isQuitting) { e.preventDefault(); win.hide(); } });
+  win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
   win.webContents.on('did-finish-load', () => send('state', engine.state));
+  // A renderer failure must not leave the app stuck behind the splash.
+  startupFallback = setTimeout(revealMainWindow, 10000);
+  win.loadFile(path.join(__dirname, '..', 'renderer', 'index.html')).catch(revealMainWindow);
 }
+
+ipcMain.on('app:ready', (event) => {
+  if (win && event.sender === win.webContents) revealMainWindow();
+});
 
 const gotLock = app.requestSingleInstanceLock();
 if (!gotLock) {
@@ -96,10 +146,17 @@ if (!gotLock) {
     loadIcons();
     tray = new Tray(trayIcon('disconnected'));
     tray.on('double-click', () => { if (win) { win.show(); win.focus(); } });
-    createWindow();
     buildTrayMenu(engine.state);
     registerIpc({ engine, store, secrets, cfg, getWin: () => win });
+    createSplashWindow();
+    createWindow();
   });
-  app.on('before-quit', () => { app.isQuitting = true; engine.disconnect(); });
+  app.on('activate', () => { if (win) { win.show(); win.focus(); } });
+  app.on('before-quit', () => {
+    app.isQuitting = true;
+    clearTimeout(revealTimer);
+    clearTimeout(startupFallback);
+    engine.disconnect();
+  });
   app.on('window-all-closed', () => { /* keep running in tray */ });
 }

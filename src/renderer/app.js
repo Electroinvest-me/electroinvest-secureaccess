@@ -16,6 +16,14 @@ function dur(since) {
 
 function render() {
   const list = $('list'); list.innerHTML = '';
+  $('profileCount').textContent = profiles.length;
+  if (!profiles.length) {
+    const empty = document.createElement('div');
+    empty.className = 'empty';
+    empty.innerHTML = '<h3>Dodajte prvu konekciju</h3><p>Unesite VPN server ili odaberite sačuvani preset.</p><button class="btn primary" type="button">Dodaj konekciju</button>';
+    empty.querySelector('button').onclick = () => openEdit(null);
+    list.appendChild(empty);
+  }
   profiles.forEach((p) => {
     const active = (st.status === 'connected' || st.status === 'connecting');
     const scls = active ? statusClass(st.status) : 'off';
@@ -29,11 +37,14 @@ function render() {
     card.querySelector('.st').textContent = (active ? statusText(st.status) : 'Nije povezano') + (active && st.ip ? ' • ' + st.ip : '');
     const acts = card.querySelector('.row-actions');
     const btn = document.createElement('button');
-    if (active) { btn.className = 'btn danger'; btn.textContent = st.status === 'connecting' ? 'Prekini' : 'Disconnect'; btn.onclick = () => window.vpn.disconnect(); }
-    else { btn.className = 'btn primary'; btn.textContent = 'Connect'; btn.onclick = () => startConnect(p.id); }
+    if (active) { btn.className = 'btn danger'; btn.textContent = 'Prekini'; btn.onclick = () => window.vpn.disconnect(); }
+    else { btn.className = 'btn primary'; btn.textContent = 'Poveži'; btn.onclick = () => startConnect(p.id); }
     acts.appendChild(btn);
-    const edit = document.createElement('span'); edit.className = 'icn'; edit.textContent = '✎'; edit.title = 'Izmijeni'; edit.onclick = () => openEdit(p); acts.appendChild(edit);
-    const del = document.createElement('span'); del.className = 'icn'; del.textContent = '🗑'; del.title = 'Obriši';
+    const edit = document.createElement('button'); edit.type = 'button'; edit.className = 'icn'; edit.title = 'Izmijeni'; edit.setAttribute('aria-label', 'Izmijeni ' + p.name);
+    edit.innerHTML = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="m12 4 4 4M4 12 13.5 2.5a2.1 2.1 0 0 1 3 3L7 15l-4 1 1-4Z"/><path d="M11 17h6"/></svg>';
+    edit.onclick = () => openEdit(p); acts.appendChild(edit);
+    const del = document.createElement('button'); del.type = 'button'; del.className = 'icn'; del.title = 'Obriši'; del.setAttribute('aria-label', 'Obriši ' + p.name);
+    del.innerHTML = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M3 5h14M7 5V3h6v2M5 5l1 12h8l1-12M8 8v6m4-6v6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
     del.onclick = async () => { if (confirm('Obrisati „' + p.name + '"?')) { profiles = await window.vpn.deleteProfile(p.id); render(); } };
     acts.appendChild(del);
     list.appendChild(card);
@@ -127,7 +138,17 @@ document.addEventListener('keydown', (e) => {
 });
 
 // ---------- log ----------
-$('logtgl').onclick = () => { const l = $('log'); l.style.display = l.style.display === 'block' ? 'none' : 'block'; };
+$('logtgl').onclick = () => {
+  const l = $('log');
+  const expanded = l.style.display !== 'block';
+  l.style.display = expanded ? 'block' : 'none';
+  $('logtgl').setAttribute('aria-expanded', String(expanded));
+};
+document.querySelectorAll('.website-link').forEach((link) => {
+  link.onclick = () => window.vpn.openWebsite().catch(() => {
+    $('log').textContent += 'Web stranica: https://electroinvest.me\n';
+  });
+});
 window.vpn.onLog((line) => { const l = $('log'); l.textContent += line + '\n'; if (l.textContent.length > 60000) l.textContent = l.textContent.slice(-40000); l.scrollTop = l.scrollHeight; });
 
 // ---------- state ----------
@@ -135,9 +156,20 @@ window.vpn.onState((s) => { st = s; render(); });
 setInterval(() => { if (st.status === 'connected') render(); }, 1000);
 
 (async () => {
-  try { const info = await window.vpn.info(); $('subline').textContent = 'Electroinvest · ' + info.platform + '/' + info.arch + ' · ' + info.driver; } catch (e) {}
-  try { presets = await window.vpn.presets(); } catch (e) { presets = {}; }
-  profiles = await window.vpn.getProfiles();
-  try { st = await window.vpn.getState(); } catch (e) {}
-  render();
+  try {
+    try {
+      const info = await window.vpn.info();
+      $('appVersion').textContent = 'v' + info.version;
+      $('appVersion').title = info.platform + '/' + info.arch + ' · ' + info.driver;
+    } catch (e) {}
+    try { presets = await window.vpn.presets(); } catch (e) { presets = {}; }
+    profiles = await window.vpn.getProfiles();
+    try { st = await window.vpn.getState(); } catch (e) {}
+    render();
+  } catch (e) {
+    $('adminWarn').textContent = 'Konekcije nije moguće učitati. Pokušajte ponovo pokrenuti aplikaciju.';
+    $('adminWarn').style.display = 'block';
+  } finally {
+    window.vpn.ready();
+  }
 })();

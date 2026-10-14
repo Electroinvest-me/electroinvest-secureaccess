@@ -11,6 +11,8 @@ contextBridge.exposeInMainWorld('vpn', {
   disconnect: () => ipcRenderer.invoke('vpn:disconnect'),
   getState: () => ipcRenderer.invoke('vpn:state'),
   info: () => ipcRenderer.invoke('app:info'),
+  openWebsite: () => ipcRenderer.invoke('app:website'),
+  ready: () => ipcRenderer.send('app:ready'),
   onState: (cb) => ipcRenderer.on('state', (e, s) => cb(s)),
   onLog: (cb) => ipcRenderer.on('log', (e, l) => cb(l)),
 });

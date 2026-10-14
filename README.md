@@ -32,7 +32,7 @@ platforms — notably **macOS** and **Windows ARM64**. This project fixes that:
 same VPN, a client that runs everywhere, a clean GUI, and automatic driver setup.
 
 ## Platforms
-- **macOS** — Apple Silicon (arm64)
+- **macOS 13 or later** — Apple Silicon (arm64)
 - **Windows x64**
 - **Windows ARM64** — with a **self-built native `openconnect`** (third-party ARM64
   builds ship a broken crypto backend; this repo builds a working one)
@@ -78,6 +78,8 @@ scripts/      build/fetch the engine + drivers per platform
 ```
 
 ## Build from source
+Requires **Node.js 22.12 or later**.
+
 ```sh
 npm install
 npm test            # unit tests for src/core

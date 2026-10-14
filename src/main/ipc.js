@@ -1,5 +1,5 @@
 'use strict';
-const { ipcMain } = require('electron');
+const { ipcMain, app, shell } = require('electron');
 const { PRESETS } = require('../core/profiles');
 
 // Strip secrets before sending profiles to the renderer.
@@ -41,7 +41,9 @@ function registerIpc({ engine, store, secrets, cfg }) {
 
   ipcMain.handle('vpn:disconnect', () => engine.disconnect());
   ipcMain.handle('vpn:state', () => engine.state);
+  ipcMain.handle('app:website', () => shell.openExternal('https://electroinvest.me'));
   ipcMain.handle('app:info', () => ({
+    version: app.getVersion(),
     platform: process.platform, arch: process.arch,
     driver: cfg.driver, secure: secrets.secure,
   }));

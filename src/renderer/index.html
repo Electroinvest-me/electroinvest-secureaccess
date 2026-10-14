@@ -2,22 +2,31 @@
 <html lang="sr">
 <head>
 <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'" />
 <title>Electroinvest SecureAccess</title>
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <header>
-    <div class="logo">E</div>
-    <div><h1>SecureAccess</h1><div class="sub" id="subline">Electroinvest · OpenConnect</div></div>
+    <button class="brand-link website-link" type="button" aria-label="Electroinvest — otvori electroinvest.me">
+      <img src="assets/electroinvest-logo.png" alt="Electroinvest" width="152" height="48" />
+    </button>
+    <div class="product"><h1>SecureAccess</h1><div class="sub" id="subline">VPN CLIENT</div></div>
   </header>
   <div id="adminWarn">⚠ Nije pokrenuto kao administrator — povezivanje možda neće raditi.</div>
-  <div class="section"><span>Konekcije</span><span class="add" id="addBtn" title="Dodaj konekciju">＋</span></div>
+  <div class="intro">
+    <div><div class="eyebrow">ELECTROINVEST SECUREACCESS</div><h2>Vaš siguran pristup.</h2><p>Vaše konekcije. Jedno sigurno mjesto.</p></div>
+    <svg class="intro-mark" viewBox="0 0 56 64" fill="none" aria-hidden="true"><path d="M28 3 51 12v18c0 14-10 24-23 31C15 54 5 44 5 30V12L28 3Z" stroke="currentColor" stroke-width="1.5"/><path d="m18 31 7 7 14-16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <div class="section"><span>Konekcije <span class="count" id="profileCount">0</span></span><button class="add" id="addBtn" type="button" title="Dodaj konekciju"><span aria-hidden="true">＋</span> Dodaj</button></div>
   <div id="list"></div>
+  <div class="brand-footer"><span>Razvijeno u Crnoj Gori.</span><button class="website-link site-link" type="button">electroinvest.me <span aria-hidden="true">↗</span></button></div>
   <footer>
     <span class="fdot" id="fdot"></span>
     <span class="ftxt" id="ftxt">Nije povezano</span>
-    <span class="logtgl" id="logtgl">Log</span>
+    <span class="app-version" id="appVersion"></span>
+    <button class="logtgl" id="logtgl" type="button" aria-expanded="false" aria-controls="log">Log</button>
   </footer>
   <pre id="log"></pre>
 
