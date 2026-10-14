@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "description": "Cross-platform OpenConnect VPN client (Ivanti/Pulse Connect Secure, AnyConnect, …) with a simple GUI.",
   "license": "GPL-3.0-or-later",
-  "author": "Electroinvest",
+  "author": "Armin Kardovic",
   "homepage": "https://github.com/electroinvest/secureaccess",
   "main": "src/main/index.js",
   "scripts": {
